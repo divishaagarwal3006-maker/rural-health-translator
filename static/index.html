@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rural Health Translator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e8eaf0;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+    .container { max-width: 720px; margin: auto; }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+    .header p {
+      font-size: 14px;
+      color: #8b8fa8;
+    }
+    .badge {
+      display: inline-block;
+      background: #1a3a2a;
+      color: #4ade80;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      border: 1px solid #2d6a4a;
+    }
+
+    .card {
+      background: #1a1d27;
+      border: 1px solid #2a2d3e;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .label {
+      font-size: 11px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 8px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      background: #0f1117;
+      color: #e8eaf0;
+      border: 1px solid #2a2d3e;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 16px;
+      outline: none;
+    }
+    select:focus { border-color: #4f8ef7; }
+
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: #0f1117;
+      color: #e8eaf0;
+      border: 1px solid #2a2d3e;
+      border-radius: 8px;
+      font-size: 14px;
+      resize: vertical;
+      outline: none;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+    textarea:focus { border-color: #4f8ef7; }
+    textarea::placeholder { color: #4b5263; }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background: #4f8ef7;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #3a7de8; }
+
+    .btn-record {
+      width: 100%;
+      padding: 12px;
+      background: #1a1d27;
+      color: #e8eaf0;
+      border: 1px solid #2a2d3e;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-record:hover { border-color: #e53935; color: #e53935; }
+    .btn-record.recording {
+      background: #2d1515;
+      border-color: #e53935;
+      color: #e53935;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    #status {
+      font-size: 13px;
+      color: #6b7280;
+      text-align: center;
+      min-height: 20px;
+      margin-top: 4px;
+    }
+    #status.success { color: #4ade80; }
+    #status.error { color: #f87171; }
+
+    .examples {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .ex-label { font-size: 12px; color: #6b7280; width: 100%; }
+    .ex-btn {
+      font-size: 12px;
+      padding: 5px 12px;
+      background: #0f1117;
+      color: #8b8fa8;
+      border: 1px solid #2a2d3e;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .ex-btn:hover { border-color: #4f8ef7; color: #4f8ef7; }
+
+    .report-section { display: none; }
+
+    .grid3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .metric {
+      background: #0f1117;
+      border: 1px solid #2a2d3e;
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .metric .val {
+      font-size: 14px;
+      font-weight: 500;
+      color: #e8eaf0;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+    .urgent { color: #fbbf24 !important; }
+    .emergency { color: #f87171 !important; }
+    .routine { color: #4ade80 !important; }
+
+    .report-block {
+      background: #0f1117;
+      border: 1px solid #2a2d3e;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .report-block p {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #c9ccd8;
+      white-space: pre-wrap;
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid #2a2d3e;
+      color: #6b7280;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { border-color: #4f8ef7; color: #4f8ef7; }
+
+    .mic-icon { font-size: 18px; }
+    .dot { width: 8px; height: 8px; background: #e53935; border-radius: 50%; display: none; }
+    .btn-record.recording .dot { display: inline-block; }
+
+    .permission-note {
+      font-size: 12px;
+      color: #6b7280;
+      text-align: center;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+   <div class="badge">🟢 AI-Powered · Free · Multilingual · 10+ Languages</div>
+   <h1>🩺 Rural Health Translator</h1>
+    <p>Patient speaks in any language → instant medical report for doctor</p>
+  </div>
+
+  <div class="card">
+    <div class="label">Select patient language</div>
+    <select id="lang">
+      <option value="English">English</option>
+      <option value="Hindi" selected>Hindi (हिंदी)</option>
+      <option value="Bengali">Bengali (বাংলা)</option>
+      <option value="Telugu">Telugu (తెలుగు)</option>
+      <option value="Tamil">Tamil (தமிழ்)</option>
+      <option value="Marathi">Marathi (मराठी)</option>
+      <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+      <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+      <option value="Malayalam">Malayalam (മലയാളം)</option>
+      <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
+      <option value="Urdu">Urdu (اردو)</option>
+    </select>
+
+    <div class="label">Patient describes symptoms</div>
+    <textarea id="symptom-input" rows="3"
+      placeholder="e.g. mera pet mein dard hai aur ulti aa rahi hai..."></textarea>
+
+    <button class="btn-primary" onclick="translateText()">
+      ⚕️ Generate Medical Report
+    </button>
+
+    <button class="btn-record" id="record-btn" onclick="toggleRecording()">
+      <span class="mic-icon">🎙️</span>
+      <span id="record-label">Record Voice</span>
+      <span class="dot"></span>
+    </button>
+    <p class="permission-note">First time: browser will ask for microphone permission — click Allow</p>
+
+    <div id="status"></div>
+
+    <div class="examples">
+      <p class="ex-label">Try an example:</p>
+      <button class="ex-btn" onclick="setEx('mera pet mein bahut dard hai aur ulti aa rahi hai')">Stomach pain</button>
+      <button class="ex-btn" onclick="setEx('seene mein dard ho raha hai saans nahi aa raha')">Chest pain</button>
+      <button class="ex-btn" onclick="setEx('teen din se bukhar hai sir mein dard hai')">Fever + headache</button>
+      <button class="ex-btn" onclick="setEx('sar ghoom raha hai khada nahi ho pa raha')">Dizziness</button>
+    </div>
+  </div>
+
+  <div class="report-section" id="report-section">
+    <div class="grid3">
+      <div class="metric">
+        <div class="label">Chief Complaint</div>
+        <div class="val" id="r-complaint"></div>
+      </div>
+      <div class="metric">
+        <div class="label">Possible Diagnosis</div>
+        <div class="val" id="r-diagnosis"></div>
+      </div>
+      <div class="metric">
+        <div class="label">Urgency</div>
+        <div class="val" id="r-urgency"></div>
+      </div>
+    </div>
+
+    <div class="report-block">
+      <div class="label">Clinical Note (for doctor)</div>
+      <p id="r-note"></p>
+    </div>
+
+    <div class="report-block">
+      <div class="label">Recommended Tests / Examination</div>
+      <p id="r-tests"></p>
+    </div>
+
+    <div class="report-block">
+      <div class="label">Tell the patient (in their language)</div>
+      <p id="r-explain" style="font-style: italic; color: #9ca3af;"></p>
+    </div>
+
+    <button class="copy-btn" onclick="copyReport()">📋 Copy Full Report</button>
+  </div>
+
+</div>
+
+<script>
+  let mediaRecorder, chunks = [];
+
+  function setEx(text) {
+    document.getElementById('symptom-input').value = text;
+  }
+
+  function setStatus(msg, type='') {
+    const s = document.getElementById('status');
+    s.textContent = msg;
+    s.className = type;
+  }
+
+  async function translateText() {
+    const text = document.getElementById('symptom-input').value.trim();
+    const lang = document.getElementById('lang').value;
+    if (!text) { setStatus('Please enter symptoms first', 'error'); return; }
+
+    setStatus('Generating medical report...', '');
+    document.getElementById('report-section').style.display = 'none';
+
+    try {
+      const res = await fetch('/translate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({symptom: text, language: lang})
+      });
+      const data = await res.json();
+      if (data.error) { setStatus('Error: ' + data.error, 'error'); return; }
+      showReport(data);
+      setStatus('✅ Report generated successfully', 'success');
+    } catch(e) {
+      setStatus('Connection error. Is the server running?', 'error');
+    }
+  }
+
+  function showReport(data) {
+    document.getElementById('r-complaint').textContent = data.chiefComplaint || '—';
+    document.getElementById('r-diagnosis').textContent = data.possibleDiagnosis || '—';
+
+    const u = document.getElementById('r-urgency');
+    u.textContent = data.urgency || '—';
+    u.className = 'val ' + (data.urgency || '').toLowerCase();
+
+    document.getElementById('r-note').textContent = data.medicalNote || '—';
+    document.getElementById('r-tests').textContent = data.recommendedTests || '—';
+    document.getElementById('r-explain').textContent = data.patientExplanation || '—';
+    document.getElementById('report-section').style.display = 'block';
+  }
+
+  async function toggleRecording() {
+    const btn = document.getElementById('record-btn');
+    const label = document.getElementById('record-label');
+
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+      try {
+        // This properly asks for microphone permission
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        chunks = [];
+
+        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(chunks, { type: 'audio/webm' });
+          const form = new FormData();
+          form.append('audio', blob, 'recording.wav');
+
+          setStatus('Transcribing voice with Whisper AI...', '');
+          try {
+            const res = await fetch('/transcribe', { method: 'POST', body: form });
+            const data = await res.json();
+            document.getElementById('symptom-input').value = data.text;
+            setStatus('✅ Voice transcribed! Now click Generate Report.', 'success');
+          } catch(e) {
+            setStatus('Transcription failed. Try typing instead.', 'error');
+          }
+
+          // Stop all tracks to release mic
+          stream.getTracks().forEach(t => t.stop());
+        };
+
+        mediaRecorder.start();
+        btn.classList.add('recording');
+        label.textContent = 'Stop Recording';
+        setStatus('🔴 Recording... speak now', '');
+
+      } catch(err) {
+        if (err.name === 'NotAllowedError') {
+          setStatus('❌ Microphone blocked! Click the 🔒 icon in address bar → Allow microphone', 'error');
+        } else {
+          setStatus('Microphone error: ' + err.message, 'error');
+        }
+      }
+    } else {
+      mediaRecorder.stop();
+      btn.classList.remove('recording');
+      label.textContent = 'Record Voice';
+    }
+  }
+
+  function copyReport() {
+    const lines = [
+      'CHIEF COMPLAINT: ' + document.getElementById('r-complaint').textContent,
+      'POSSIBLE DIAGNOSIS: ' + document.getElementById('r-diagnosis').textContent,
+      'URGENCY: ' + document.getElementById('r-urgency').textContent,
+      '\nCLINICAL NOTE:\n' + document.getElementById('r-note').textContent,
+      '\nRECOMMENDED TESTS:\n' + document.getElementById('r-tests').textContent,
+      '\nPATIENT EXPLANATION:\n' + document.getElementById('r-explain').textContent,
+    ];
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+      setStatus('✅ Report copied to clipboard!', 'success');
+    });
+  }
+</script>
+</body>
+</html>

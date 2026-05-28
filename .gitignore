@@ -1,0 +1,31 @@
+ #Virtual environment
+venv/
+env/
+.env
+
+# API Keys — NEVER commit these!
+secrets.py
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Audio files (patient data — keep private)
+*.wav
+*.mp4
+*.mp3
+
+# VS Code
+.vscode/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Mac
+.DS_Store
+
+# Whisper model cache
+~/.cache/whisper/
