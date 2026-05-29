@@ -1,5 +1,6 @@
 flask
 flask-cors
-openai-whisper
 groq
+openai-whisper
 torch
+numpy

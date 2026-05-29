@@ -7,7 +7,7 @@ import json, os, tempfile, re
 app = Flask(__name__, static_folder='static')
 CORS(app)
 
-GROQ_API_KEY = "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"
+GROQ_API_KEY = "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"
 client = Groq(api_key=GROQ_API_KEY)
 
 print("Loading Whisper model...")
@@ -80,4 +80,4 @@ Reply with ONLY this JSON, no markdown, no backticks, no extra text:
 
 if __name__ == "__main__":
     os.makedirs("static", exist_ok=True)
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
