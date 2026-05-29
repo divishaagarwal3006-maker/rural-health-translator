@@ -7,7 +7,7 @@ import json, os, tempfile, re
 app = Flask(__name__, static_folder='static')
 CORS(app)
 
-GROQ_API_KEY = "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"
+GROQ_API_KEY = "yourapikey"
 client = Groq(api_key=GROQ_API_KEY)
 
 print("Loading Whisper model...")
