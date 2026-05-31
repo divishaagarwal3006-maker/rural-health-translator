@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from groq import Groq
-import json, os, re
+import json, os, re, tempfile
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
 
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")  # ✅ safe, reads from Render env
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY)
 
 with open("medical_map.json", "r") as f:
@@ -16,6 +16,27 @@ with open("medical_map.json", "r") as f:
 @app.route("/")
 def index():
     return send_from_directory("static", "index.html")
+
+
+@app.route("/transcribe", methods=["POST"])
+def transcribe():
+    if "audio" not in request.files:
+        return jsonify({"error": "No audio file"}), 400
+    audio_file = request.files["audio"]
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        audio_file.save(tmp.name)
+        tmp_path = tmp.name
+    try:
+        with open(tmp_path, "rb") as f:
+            transcription = client.audio.transcriptions.create(
+                model="whisper-large-v3",
+                file=f,
+            )
+        os.unlink(tmp_path)
+        return jsonify({"text": transcription.text})
+    except Exception as e:
+        os.unlink(tmp_path)
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/translate", methods=["POST"])
